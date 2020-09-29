@@ -97,28 +97,6 @@ export const addHtml = (elProps, htmlProps) => {
   el.insertBefore(markup, el.childNodes[0])
 }
 
-export const isWindowGreaterOrEqual = compareWidth => {
-  const width = window.innerWidth
-  return compareWidth >= width
-}
-
-export const isWindowLessOrEqual = compareWidth => {
-  const width = window.innerWidth
-  return compareWidth <= width
-}
-
-export const runOnWindowWidth = (width, callback) => {
-  if (isWindowGreaterOrEqual(width)) {
-    callback()
-  }
-}
-
-export const runOverWindowWidth = (width, callback) => {
-  if (isWindowLessOrEqual(width)) {
-    callback()
-  }
-}
-
 export const toggleActiveClass = el => {
   !el.classList.contains("active")
     ? addClasses(el, ["active"])
@@ -140,27 +118,4 @@ export const toggleMenu = () => {
 
 export const scrollToEl = el => {
   el.scrollIntoView(true, { behavior: "smooth" })
-}
-
-// AJAX stuff
-
-export const ajaxQuery = props => {
-  return {
-    action: props.action,
-    page: props.page,
-    query: {
-      tax: props.query.tax,
-      term: props.query.term,
-    },
-  }
-}
-
-export const ajaxPost = props => {
-  const $ = jQuery
-  $.post(props.ajaxUrl, props.query).done(posts => {
-    props.callback()
-    props.container.html(posts)
-    props.postsArea.css("opacity", 1)
-    scrollToEl(document.getElementById("featured-articles-heading"))
-  })
 }
