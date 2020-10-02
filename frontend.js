@@ -1,12 +1,10 @@
 import "@babel/polyfill"
-import showFooterMenu from "./handlers/showFooterMenu"
 import { getCookie } from "./utils/cookies"
 import getPostType from "./utils/meta"
 import {
   runOnWindowWidth,
   runOverWindowWidth,
   runBetweenWidths,
-  runIfPastElandBeforeEl2,
 } from "./utils/window"
 import {
   addHtml,
@@ -18,8 +16,13 @@ import {
 } from "./utils"
 
 const init = () => {
-  const footerMenus = document.querySelectorAll(".footer-menu")
-  const showFooterMenus = () => showFooterMenu(footerMenus)
+  const showFooterMenus = async () => {
+    const { default: showFooterMenu } = await import(
+      "./handlers/showFooterMenu"
+    )
+    const footerMenus = document.querySelectorAll(".footer-menu")
+    showFooterMenu(footerMenus)
+  }
   const desktopMenu = async () => {
     const { default: showSubMenu } = await import("./handlers/showSubMenu")
     showSubMenu()
@@ -56,8 +59,8 @@ const init = () => {
       header.append(secondaryCtaNav)
     }
   }
-  runOverWindowWidth("1400", desktopMenu)
   runOnWindowWidth("1024", showFooterMenus)
+  runOverWindowWidth("1400", desktopMenu)
   runOnWindowWidth("1400", mobileMenu)
   runBetweenWidths({ min: "775", max: "1400" }, addCtaMenuToMobileHeader)
 
@@ -101,6 +104,7 @@ const init = () => {
   }
   runOnWindowWidth("1400", createMobileCtctNav)
 
+  // show progress bar at top of screen, on posts
   const showProgressBar = async () => {
     if (getPostType() !== "single") {
       return
@@ -110,6 +114,7 @@ const init = () => {
   }
   showProgressBar()
 
+  // appearing and disappearing social share bar on side of screen, on posts
   const secondarySocialShare = async () => {
     if (getPostType() !== "single") {
       return
@@ -121,6 +126,7 @@ const init = () => {
   }
   secondarySocialShare()
 
+  // opt-in form for new users, if they're on the site for 2 minutes
   const maybeShowOptinForm = async () => {
     if (!getCookie("hide-optin")) {
       const popupSignup = async () => {
@@ -149,4 +155,6 @@ const init = () => {
   }
   maybeShowOptinForm()
 }
+
+// initialize site
 init()
