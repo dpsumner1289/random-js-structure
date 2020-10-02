@@ -3,9 +3,13 @@ import {
   appendNode,
   containNodes,
   extractNodes,
+  checkForModule,
 } from "../utils/index"
 
 const createMobileNav = props => {
+  if (checkForModule(`#${props.container.id}`)) {
+    return
+  }
   const menus = extractNodes(props.menus)
   const menuContainer = containNodes(
     {

@@ -1,4 +1,4 @@
-import setTimeLeftInSession from "./setTimeLeftInSession"
+import setTimeLeftInSession from "../session-methods/setTimeLeftInSession"
 
 const waitSetTime = (time, action) => {
   let seconds = time

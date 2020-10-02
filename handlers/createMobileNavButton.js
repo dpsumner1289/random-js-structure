@@ -4,9 +4,13 @@ import {
   prependNodeContents,
   appendNode,
   toggleMenu,
+  checkForModule,
 } from "../utils/index"
 
 const createMobileNavButton = props => {
+  if (checkForModule("#menu-open")) {
+    return
+  }
   const menuBars =
     "<div class='hamburger'><span id='x-left'></span><span id='x-middle'></span><span id='x-right'></span></div>"
   const button = {

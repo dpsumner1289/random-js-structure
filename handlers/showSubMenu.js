@@ -1,9 +1,5 @@
-import {
-  addClasses,
-  removeClasses,
-  runOverWindowWidth,
-  runOnWindowWidth,
-} from "../utils"
+import { runOverWindowWidth, runOnWindowWidth } from "../utils/window"
+import { addClasses, removeClasses } from "../utils"
 
 const showSubMenu = (triggerListeners, menuListeners) => {
   const triggers = [].slice.call(
@@ -26,8 +22,8 @@ const showSubMenu = (triggerListeners, menuListeners) => {
   const desktopMenu = () => addEvents(["mouseenter", "mouseleave"])
   const mobileMenu = () => addEvents(["click"])
 
-  runOverWindowWidth("1024", desktopMenu)
-  runOnWindowWidth("1024", mobileMenu)
+  runOverWindowWidth("1400", desktopMenu)
+  runOnWindowWidth("1400", mobileMenu)
 }
 
 export default showSubMenu

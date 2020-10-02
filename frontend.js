@@ -1,14 +1,20 @@
 import "@babel/polyfill"
-import slideHide from "./handlers/slideHide.js"
-import showFooterMenu from "./handlers/showFooterMenu.js"
+import showFooterMenu from "./handlers/showFooterMenu"
 import { getCookie } from "./utils/cookies"
+import getPostType from "./utils/meta"
+import {
+  runOnWindowWidth,
+  runOverWindowWidth,
+  runBetweenWidths,
+  runIfPastElandBeforeEl2,
+} from "./utils/window"
 import {
   addHtml,
   createNode,
-  runOnWindowWidth,
-  runOverWindowWidth,
   addClasses,
   removeClasses,
+  getNodeBySelector,
+  checkForModule,
 } from "./utils"
 
 const init = () => {
@@ -26,28 +32,34 @@ const init = () => {
       const subMenu = "ul.sub-menu"
       const subMenuNode = document.querySelector(subMenu)
       const subMenuAll = [].slice.call(document.querySelectorAll(subMenu))
-      const closeButton = createNode("div")
       const closeSubmenu = () => {
         removeClasses(subMenuNode, ["active"])
       }
-      closeButton.innerText = "Back"
-      closeButton.addEventListener("click", closeSubmenu)
-      addClasses(closeButton, ["close-sub-menu"])
       subMenuAll.forEach(sub => {
+        const closeButton = createNode("div")
+        closeButton.innerText = "Back"
+        closeButton.addEventListener("click", closeSubmenu)
+        addClasses(closeButton, ["close-sub-menu"])
         sub.append(closeButton)
       })
     }
     createSubmenuCloseButton()
   }
-
-  runOverWindowWidth("1024", desktopMenu)
+  const addCtaMenuToMobileHeader = async () => {
+    if (checkForModule(".secondary-cta")) {
+      return
+    }
+    const { default: copyCtaNav } = await import("./handlers/copyCtaNav")
+    const secondaryCtaNav = copyCtaNav()
+    if (secondaryCtaNav) {
+      const header = getNodeBySelector("#site-header")
+      header.append(secondaryCtaNav)
+    }
+  }
+  runOverWindowWidth("1400", desktopMenu)
   runOnWindowWidth("1024", showFooterMenus)
-  runOnWindowWidth("1024", mobileMenu)
-  // animation handler for the "Topic Explore" section on the home page
-  const topNav = document.querySelector(".topic-nav")
-  const topicOpen = document.querySelector(".explore-heading i")
-
-  slideHide(topicOpen, topNav, ["click"])
+  runOnWindowWidth("1400", mobileMenu)
+  runBetweenWidths({ min: "775", max: "1400" }, addCtaMenuToMobileHeader)
 
   // insert phone icon in header
   const insertPhoneIcon = () => {
@@ -87,35 +99,49 @@ const init = () => {
     })
     createMobileNavButton({ domSelector: "#site-header" })
   }
-  runOnWindowWidth("1024", createMobileCtctNav)
+  runOnWindowWidth("1400", createMobileCtctNav)
 
   const showProgressBar = async () => {
-    const { default: progressBar } = await import("./handlers/progressBar.js")
-    const { checkForModule } = await import("./utils")
-    if (checkForModule("body.single")) {
-      document.addEventListener("scroll", progressBar, { passive: true })
+    if (getPostType() !== "single") {
+      return
     }
+    const { default: progressBar } = await import("./handlers/progressBar")
+    document.addEventListener("scroll", progressBar, { passive: true })
   }
   showProgressBar()
+
+  const secondarySocialShare = async () => {
+    if (getPostType() !== "single") {
+      return
+    }
+    const { default: positionSocialSharingSide } = await import(
+      "./handlers/positionSocialSharingSide"
+    )
+    positionSocialSharingSide()
+  }
+  secondarySocialShare()
 
   const maybeShowOptinForm = async () => {
     if (!getCookie("hide-optin")) {
       const popupSignup = async () => {
         const { default: newsletterSignupPopup } = await import(
-          "./handlers/newsletterSignupPopup.js"
+          "./forms/newsletterSignupPopup"
+        )
+        const { default: submitEmailSignupAction } = await import(
+          "./forms/submitEmailSignupAction"
         )
         newsletterSignupPopup()
+        submitEmailSignupAction()
       }
       // check if this user has existing session
-      const { default: isNewUser } = await import("./handlers/isNewUser")
+      const { default: isNewUser } = await import("./session-methods/isNewUser")
       isNewUser()
 
       // get the time left in session before popup
       const { default: getTimeLeftInSession } = await import(
-        "./handlers/getTimeLeftInSession"
+        "./session-methods/getTimeLeftInSession"
       )
       const timeLeft = getTimeLeftInSession()
-      console.log(timeLeft)
       // start or continue countdown to popup
       const { default: waitSetTime } = await import("./handlers/waitSetTime")
       waitSetTime(timeLeft, popupSignup)
